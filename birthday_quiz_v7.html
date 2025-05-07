@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>艮艮的30歲生日大挑戰</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background: #fffbe6;
+      color: #333;
+      text-align: center;
+      padding: 2em;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 1em;
+      animation: popIn 1s ease-in-out;
+    }
+    .question {
+      display: none;
+      margin: 2em auto;
+    }
+    .active {
+      display: block;
+    }
+    button {
+      display: block;
+      margin: 1em auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ffd700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #result {
+      display: none;
+      margin-top: 3em;
+      font-size: 1.2em;
+      line-height: 1.6;
+      position: relative;
+    }
+    #congrats {
+      font-size: 2em;
+      font-weight: bold;
+      color: #e91e63;
+      animation: bounce 1s infinite alternate;
+    }
+    #confetti, #hearts {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #overlay {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      z-index: 99999;
+    }
+    .card {
+      margin-top: 3em;
+      display: inline-block;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      padding: 2em;
+      position: relative;
+    }
+    .cake {
+      font-size: 3em;
+      margin-bottom: 1em;
+    }
+    .mute-toggle {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 10000;
+      font-size: 1em;
+    }
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.2); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.5em; }
+      button { font-size: 14px; padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body onclick="startExperience()">
+  <div id="overlay">3</div>
+  <h1>艮艮的30歲生日大挑戰</h1>
+  <audio id="bgmusic" src="birthday_theme.mp3" autoplay loop></audio>
+  <button class="mute-toggle" onclick="toggleMute()">🔊</button>
+  <div id="quiz"></div>
+  <div id="result">
+    <div class="card">
+      <div class="cake">🎂</div>
+      <div id="congrats">🎉 滿分！🎉</div>
+      <p id="typed"></p>
+    </div>
+  </div>
+  <canvas id="confetti"></canvas>
+  
+
+  <script>
+    const quizData = [
+      { q: "Q1：在《派遣女醫》中，誰是大門未知子的情人？", options: ["加地秀樹", "城之內博美", "海老名敬"], correct: 1 },
+      { q: "Q2：大門未知子的經典台詞是？", options: ["私、失敗しないので", "サイナス", "メロンです、請求書です。"], correct: 0 },
+      { q: "Q3：城門上過幾次天台？", options: ["5", "6", "7"], correct: 1 },
+      { q: "Q4：第一次看球偷牽手手在哪裡？", options: ["洲際球場", "台北大巨蛋", "新莊城堡"], correct: 2 },
+      { q: "Q5：現任總教練是誰？", options: ["平野惠一", "林威助", "彭政閔"], correct: 0 },
+      { q: "Q6：以下哪個不是阿坤的綽號？", options: ["小可愛", "小可怕", "小可憐"], correct: 2 }
+    ];
+
+    let current = 0;
+    const quizContainer = document.getElementById('quiz');
+    const resultContainer = document.getElementById('result');
+    const typed = document.getElementById('typed');
+
+    function loadQuestion(index) {
+      const q = quizData[index];
+      quizContainer.innerHTML = `<div class="question active">
+        <h2>${q.q}</h2>
+        ${q.options.map((opt, i) => `<button onclick="answer(${i})">${String.fromCharCode(97 + i)}. ${opt}</button>`).join('')}
+      </div>`;
+    }
+
+    function answer(choice) {
+      if (choice === quizData[current].correct) {
+        current++;
+        if (current < quizData.length) {
+          loadQuestion(current);
+        } else {
+          showResult();
+        }
+      } else {
+        alert("登愣～再想想看！");
+      }
+    }
+
+    function showResult() {
+      quizContainer.style.display = 'none';
+      resultContainer.style.display = 'block';
+      launchConfetti();
+      
+      launchFireworks();
+      typeText("親愛的艮，30歲的妳，還是一樣可愛又有趣。無論是看城門閃閃發光，還是在球場一起為兄弟吶喊。歡迎加入30代的行列！生日快樂，未來也請多多指教！\n\n— Kid");
+    }
+
+    function typeText(text) {
+      let i = 0;
+      function typing() {
+        if (i < text.length) {
+          typed.innerHTML += text[i++];
+          setTimeout(typing, 60);
+        }
+      }
+      typing();
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const confettis = Array.from({length: 150}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 6 + 4,
+        d: Math.random() * 40 + 10,
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`
+      }));
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettis.forEach(c => {
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+          ctx.fillStyle = c.color;
+          ctx.fill();
+          c.y += Math.cos(c.d) + 1 + c.r / 2;
+          c.x += Math.sin(c.d);
+          if (c.y > canvas.height) {
+            c.y = -10;
+            c.x = Math.random() * canvas.width;
+          }
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+            });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function launchFireworks() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      setTimeout(() => {
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => {
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 50, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 60%)`;
+            ctx.fill();
+          }, i * 100);
+        }
+      }, 2000);
+    }
+
+    function toggleMute() {
+      const audio = document.getElementById("bgmusic");
+      audio.muted = !audio.muted;
+      document.querySelector(".mute-toggle").textContent = audio.muted ? "🔇" : "🔊";
+    }
+
+    function startCountdown() {
+      const overlay = document.getElementById("overlay");
+      let count = 3;
+      const interval = setInterval(() => {
+        count--;
+        overlay.textContent = count === 0 ? "GO!" : count;
+        if (count < 0) {
+          clearInterval(interval);
+          overlay.style.display = "none";
+          loadQuestion(current);
+        }
+      }, 1000);
+    }
+
+    
+    function startExperience() {
+      document.body.onclick = null;
+      const overlay = document.getElementById("overlay");
+      const music = document.getElementById("bgmusic");
+      if (music) music.play().catch(() => {});
+      let count = 3;
+      const interval = setInterval(() => {
+        count--;
+        overlay.textContent = count === 0 ? "GO!" : count;
+        if (count < 0) {
+          clearInterval(interval);
+          overlay.style.display = "none";
+          loadQuestion(current);
+        }
+      }, 1000);
+    }
+    
+  </script>
+</body>
+</html>
